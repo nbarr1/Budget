@@ -5,34 +5,50 @@ A single-user, multi-device personal finance app: recurring income/expense track
 ## Stack choice
 
 - **Next.js App Router + React + TypeScript** for a type-safe mobile web app deployable to Vercel.
-- **Prisma + Postgres** for production hosted persistence; local development can use SQLite via `DATABASE_URL=file:./dev.db`.
+- **Prisma + Postgres** for hosted persistence.
 - **date-fns** for deterministic date and month-boundary logic.
 - **Integer cents** for all money storage and calculations.
 
 ## Run locally
 
 ```bash
-cp .env.example .env
 npm install
-npm run db:migrate -- --name init
+vercel env pull .env
+npm run db:deploy
 npm run db:seed
 npm run dev
 ```
 
-Open http://localhost:3000 and sign in with `APP_PASSWORD` from `.env`.
+Open http://localhost:3000.
+
+## Initial data upload
+
+Use the **Initial data upload** form to upload one or more bank statement CSV or text-based PDF files. CSV imports support common headers:
+
+- Date: `Date`, `Transaction Date`, `Posted Date`, or `Post Date`
+- Description: `Description`, `Name`, `Merchant`, `Payee`, or `Memo`
+- Amount: `Amount`, or separate `Debit` / `Credit` columns
+- Optional: `Category`, `Account`, or `Account Name`
+
+Positive amounts become income, negative amounts become expenses. Uploaded transactions are imported as one-time entries; recurring bills and paychecks still need to be reviewed or entered manually.
+
+PDF support currently targets text-based Capital One bank statements with transaction tables in `DATE DESCRIPTION CATEGORY AMOUNT BALANCE` format.
+
+After multiple months of statements are uploaded, the app scans one-time imported transactions for recurring patterns. Matching items appear under **Detected recurring items** with cadence, amount, and confidence. Accepting a suggestion creates a recurring entry; internal transfers are ignored by the detector.
 
 ## Commands
 
 - `npm run dev` - generate the Prisma client, then start the local app
 - `npm run build` - generate the Prisma client, then create a production build
 - `npm run test` - recurrence, safe-to-spend, and debt math tests
+- `npm run db:deploy` - apply committed Prisma migrations and regenerate `@prisma/client`
 - `npm run db:generate` - regenerate `@prisma/client` after schema changes
 - `npm run db:seed` - load realistic sample data
 - `npm run db:wipe` - clear all data
 
 ## Deploy
 
-Deploy to Vercel or another Node host. Use hosted Postgres (Neon/Supabase/Vercel Postgres), set `DATABASE_URL`, `APP_PASSWORD`, and `AUTH_SECRET`, then run Prisma migrations during deploy.
+Deploy to Vercel or another Node host. Use hosted Postgres (Neon/Supabase/Vercel Postgres), set `DATABASE_URL`, then run Prisma migrations before deploy.
 
 ## Deferred integration points
 

@@ -6,15 +6,18 @@
     "start": "next start",
     "test": "vitest run",
     "db:migrate": "prisma migrate dev && prisma generate",
+    "db:deploy": "prisma migrate deploy && prisma generate",
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:wipe": "tsx prisma/wipe.ts"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.80",
     "@prisma/client": "6.15.0",
     "date-fns": "4.4.0",
     "lucide-react": "1.21.0",
     "next": "16.2.9",
+    "pdf-parse": "^2.4.5",
     "prisma": "6.15.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",

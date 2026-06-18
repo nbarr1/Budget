@@ -12,4 +12,3 @@ export function simulateDebtPayoff(debts: Debt[], strategy: Strategy, extraMonth
   }
   return { months: month, totalInterestCents: totalInterest, payoffDate: new Date(baseDate.getFullYear(), baseDate.getMonth()+month, 1), timeline };
 }
-}
