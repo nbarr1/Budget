@@ -11,7 +11,7 @@ export function projectCashFlow(accounts: Account[], entries: Entry[], from: Dat
   return days;
 }
 export function computeSafeToSpend(accounts: Account[], entries: Entry[], bufferCents: number, today: Date, horizonDays = 90, accountId?: string) {
-  const to = addUtcDays(today, horizonDays); const occ = getOccurrences(entries, today, to, accountId); const nextPayday = occ.find(o=>o.type==='INCOME' && compareUtcDays(o.date, today) > 0)?.date ?? null; const until = nextPayday ?? to;
+  const to = addUtcDays(today, horizonDays); const occ = getOccurrences(entries, today, to, accountId); const nextPayday = occ.find(o=>o.type==='INCOME')?.date ?? null; const until = nextPayday ?? to;
   const bills = occ.filter(o=>o.type==='EXPENSE' && onOrBeforeUtc(o.date, until)).reduce((s,o)=>s+o.amountCents,0); const current = accounts.filter(a=>!accountId || a.id===accountId).reduce((s,a)=>s+a.balanceCents,0); const safe = current - bills - bufferCents;
   return { currentProjectedBalanceCents: current, nextPaydayDate: nextPayday, billsBeforePaydayCents: bills, bufferCents, safeToSpendCents: safe, consideredEvents: occ.filter(o=>onOrBeforeUtc(o.date, until)) };
 }
