@@ -14,7 +14,7 @@ A single-user, multi-device personal finance app: recurring income/expense track
 ```bash
 cp .env.example .env
 npm install
-npx prisma migrate dev --name init
+npm run db:migrate -- --name init
 npm run db:seed
 npm run dev
 ```
@@ -23,9 +23,10 @@ Open http://localhost:3000 and sign in with `APP_PASSWORD` from `.env`.
 
 ## Commands
 
-- `npm run dev` - start local app
-- `npm run build` - production build
+- `npm run dev` - generate the Prisma client, then start the local app
+- `npm run build` - generate the Prisma client, then create a production build
 - `npm run test` - recurrence, safe-to-spend, and debt math tests
+- `npm run db:generate` - regenerate `@prisma/client` after schema changes
 - `npm run db:seed` - load realistic sample data
 - `npm run db:wipe` - clear all data
 
@@ -40,3 +41,8 @@ Deploy to Vercel or another Node host. Use hosted Postgres (Neon/Supabase/Vercel
 - **Savings goals:** Prisma includes `Goal` with user/account relationships. UI is intentionally deferred.
 
 See `ARCHITECTURE.md` for computation and adapter details.
+
+
+## Troubleshooting
+
+If Next.js reports `Cannot find module .prisma/client/default`, the generated Prisma client is missing. Run `npm run db:generate` or restart with `npm run dev`; `postinstall`, `dev`, and `build` all generate the client automatically.

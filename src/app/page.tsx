@@ -1,14 +1,5 @@
 import { redirect } from 'next/navigation'; import { addDays, format } from 'date-fns'; import { requireUser } from '@/lib/auth'; import { loadUserData } from '@/lib/load'; import { computeSafeToSpend, projectCashFlow, getOccurrences } from '@/lib/forecast'; import { formatMoney } from '@/lib/money'; import { simulateDebtPayoff } from '@/lib/debt'; import { prisma } from '@/lib/db';
-async function addEntry(fd:FormData){
-  'use server';
-  const u=await requireUser();
-  const amount = Number(fd.get('amount'));
-  const startDateStr = fd.get('startDate');
-  if (isNaN(amount) || !startDateStr) throw new Error('Invalid input');
-  const startDate = new Date(String(startDateStr));
-  if (isNaN(startDate.getTime())) throw new Error('Invalid start date');
-  await prisma.entry.create({data:{userId:u.id,accountId:String(fd.get('accountId')),name:String(fd.get('name')),type:String(fd.get('type')),amountCents:Math.round(amount*100),category:String(fd.get('category')||'General'),scheduleJson:JSON.stringify({frequency:String(fd.get('frequency')),dayOfMonth:fd.get('dayOfMonth')?Number(fd.get('dayOfMonth')):undefined}),startDate,isAuto:fd.get('isAuto')==='on',isVariable:fd.get('isVariable')==='on'}});
-}
+async function addEntry(fd:FormData){'use server'; const u=await requireUser(); await prisma.entry.create({data:{userId:u.id,accountId:String(fd.get('accountId')),name:String(fd.get('name')),type:String(fd.get('type')),amountCents:Math.round(Number(fd.get('amount'))*100),category:String(fd.get('category')||'General'),scheduleJson:JSON.stringify({frequency:String(fd.get('frequency')),dayOfMonth:fd.get('dayOfMonth')?Number(fd.get('dayOfMonth')):undefined}),startDate:new Date(String(fd.get('startDate'))),isAuto:fd.get('isAuto')==='on',isVariable:fd.get('isVariable')==='on'}});}
 async function saveSettings(fd:FormData){'use server'; const u=await requireUser(); await prisma.user.update({where:{id:u.id},data:{bufferCents:Math.round(Number(fd.get('buffer'))*100)}})}
 async function addAccount(fd:FormData){'use server'; const u=await requireUser(); await prisma.account.create({data:{userId:u.id,name:String(fd.get('name')),type:String(fd.get('type')),balanceCents:Math.round(Number(fd.get('balance'))*100)}})}
 async function addDebt(fd:FormData){'use server'; const u=await requireUser(); await prisma.debt.create({data:{userId:u.id,name:String(fd.get('name')),balanceCents:Math.round(Number(fd.get('balance'))*100),aprBps:Math.round(Number(fd.get('apr'))*100),minimumPaymentCents:Math.round(Number(fd.get('minimum'))*100),dueDay:Number(fd.get('dueDay'))}})}

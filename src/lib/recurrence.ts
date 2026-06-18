@@ -1,4 +1,4 @@
-import { addDays, addMonths, addWeeks, compareAsc, differenceInCalendarDays, differenceInCalendarMonths, endOfMonth, formatISO, isAfter, isBefore, isEqual, max, parseISO, setDate, startOfDay } from 'date-fns';
+import { addDays, addMonths, addWeeks, compareAsc, endOfMonth, formatISO, isAfter, isBefore, isEqual, max, parseISO, setDate, startOfDay } from 'date-fns';
 import type { Entry, Occurrence } from './types';
 
 const dayKey = (d: Date) => formatISO(startOfDay(d), { representation: 'date' });
