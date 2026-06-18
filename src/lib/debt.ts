@@ -9,5 +9,5 @@ export function simulateDebtPayoff(debts: Debt[], strategy: Strategy, extraMonth
     for(const d of rows.filter(d=>d.balanceCents>0)){ if(pool<=0) break; const p=Math.min(pool,d.balanceCents); d.balanceCents-=p; pool-=p; }
     timeline.push({month,totalBalanceCents:rows.reduce((s,d)=>s+d.balanceCents,0)});
   }
-  return { months: month, totalInterestCents: totalInterest, payoffDate: new Date(new Date().getFullYear(), new Date().getMonth()+month, 1), timeline };
+  const isPerpetual = rows.some(d=>d.balanceCents>0); return { months: isPerpetual ? Infinity : month, totalInterestCents: totalInterest, payoffDate: isPerpetual ? null : new Date(new Date().getFullYear(), new Date().getMonth()+month, 1), timeline };
 }
