@@ -1,0 +1,3 @@
+import { cookies } from 'next/headers'; import { redirect } from 'next/navigation';
+export default function Login(){ async function login(formData:FormData){'use server'; if(formData.get('password')!==process.env.APP_PASSWORD) return; (await cookies()).set('budget_auth',process.env.AUTH_SECRET ?? 'dev-secret',{httpOnly:true,sameSite:'lax'}); redirect('/'); }
+return <main className="wrap"><div className="card"><h1>Sign in</h1><form action={login} className="form"><input name="password" type="password" placeholder="App password"/><button>Enter</button></form></div></main>}
