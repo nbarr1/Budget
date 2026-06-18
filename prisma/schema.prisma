@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  bufferCents  Int       @default(50000)
+  createdAt    DateTime  @default(now())
+  accounts     Account[]
+  entries      Entry[]
+  debts        Debt[]
+  goals        Goal[]
+}
+
+model Account {
+  id           String  @id @default(cuid())
+  userId       String
+  name         String
+  type         String
+  balanceCents Int     @default(0)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries      Entry[]
+  goals        Goal[]
+}
+
+model Entry {
+  id               String    @id @default(cuid())
+  userId           String
+  accountId        String
+  name             String
+  type             String
+  amountCents      Int
+  category         String
+  scheduleJson     String
+  startDate        DateTime
+  endDate          DateTime?
+  notes            String?
+  isAuto           Boolean   @default(false)
+  isVariable       Boolean   @default(false)
+  skippedDatesJson String    @default("[]")
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account          Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Debt {
+  id                  String @id @default(cuid())
+  userId              String
+  name                String
+  balanceCents        Int
+  aprBps              Int
+  minimumPaymentCents Int
+  dueDay              Int
+  user                User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id                String    @id @default(cuid())
+  userId            String
+  accountId         String?
+  name              String
+  targetAmountCents Int
+  currentSavedCents Int       @default(0)
+  targetDate        DateTime?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account           Account?  @relation(fields: [accountId], references: [id])
+}
+
+model BankConnection {
+  id             String   @id @default(cuid())
+  userId         String
+  provider       String
+  externalItemId String?
+  status         String   @default("MANUAL")
+  metadataJson   String   @default("{}")
+  createdAt      DateTime @default(now())
+}
+
+model ImportJob {
+  id          String   @id @default(cuid())
+  userId      String
+  sourceType  String
+  status      String   @default("PENDING")
+  rawFileName String?
+  reportJson  String   @default("{}")
+  createdAt   DateTime @default(now())
+}

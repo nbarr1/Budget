@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "prisma generate && next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "test": "vitest run",
+    "db:migrate": "prisma migrate dev && prisma generate",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:wipe": "tsx prisma/wipe.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.15.0",
+    "date-fns": "4.4.0",
+    "lucide-react": "1.21.0",
+    "next": "16.2.9",
+    "prisma": "6.15.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "recharts": "3.8.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.21.0",
+    "typescript": "6.0.3",
+    "vitest": "4.0.15"
+  }
+}
