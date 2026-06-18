@@ -1,0 +1,3 @@
+export type RawImport={fileName:string;mimeType:string;bytes:Uint8Array}; export type NormalizedTransaction={date:string;name:string;amountCents:number;accountHint?:string;category?:string};
+export interface StatementImporter{ parse(raw:RawImport):Promise<unknown[]>; normalize(rows:unknown[]):Promise<NormalizedTransaction[]>; categorize(txns:NormalizedTransaction[]):Promise<NormalizedTransaction[]>; reconcile(userId:string,txns:NormalizedTransaction[]):Promise<{created:number;matched:number}>; }
+export class StubStatementImporter implements StatementImporter{ async parse(){return []} async normalize(){return []} async categorize(t:NormalizedTransaction[]){return t} async reconcile(){return {created:0,matched:0}} }
