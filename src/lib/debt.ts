@@ -1,6 +1,6 @@
 import type { Debt } from './types';
 export type Strategy='snowball'|'avalanche';
-export function simulateDebtPayoff(debts: Debt[], strategy: Strategy, extraMonthlyCents=0, lumpSumCents=0) {
+export function simulateDebtPayoff(debts: Debt[], strategy: Strategy, extraMonthlyCents=0, lumpSumCents=0, baseDate = new Date()) {
   let rows = debts.map(d=>({...d,balanceCents:d.balanceCents})); let month=0,totalInterest=0; const timeline:{month:number,totalBalanceCents:number}[]=[];
   const totalBudget = debts.filter(d=>d.balanceCents>0).reduce((s,d)=>s+d.minimumPaymentCents,0)+extraMonthlyCents;
   if (lumpSumCents>0) { rows.sort((a,b)=>strategy==='snowball'?a.balanceCents-b.balanceCents:b.aprBps-a.aprBps); let left=lumpSumCents; for(const d of rows){ const p=Math.min(left,d.balanceCents); d.balanceCents-=p; left-=p; if(left<=0) break; } }
@@ -10,5 +10,6 @@ export function simulateDebtPayoff(debts: Debt[], strategy: Strategy, extraMonth
     for(const d of rows.filter(d=>d.balanceCents>0)){ if(pool<=0) break; const p=Math.min(pool,d.balanceCents); d.balanceCents-=p; pool-=p; }
     timeline.push({month,totalBalanceCents:rows.reduce((s,d)=>s+d.balanceCents,0)});
   }
-  return { months: month, totalInterestCents: totalInterest, payoffDate: new Date(new Date().getFullYear(), new Date().getMonth()+month, 1), timeline };
+  return { months: month, totalInterestCents: totalInterest, payoffDate: new Date(baseDate.getFullYear(), baseDate.getMonth()+month, 1), timeline };
+}
 }
