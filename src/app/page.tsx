@@ -34,11 +34,46 @@ function money(value: number) {
   return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
+function splitCsvLine(line: string) {
+  const cells: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    const next = line[index + 1];
+
+    if (char === '"' && inQuotes && next === '"') {
+      current += '"';
+      index += 1;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      cells.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  cells.push(current.trim());
+  return cells;
+}
+
+function parseAmount(value: string | undefined) {
+  if (!value) return 0;
+  const isParentheticalNegative = /^\s*\(.*\)\s*$/.test(value);
+  const cleaned = value.replace(/[^0-9.-]/g, '');
+  const amount = Number(cleaned);
+  if (!Number.isFinite(amount)) return 0;
+  return isParentheticalNegative ? -Math.abs(amount) : amount;
+}
+
 function parseCsv(text: string): Tx[] {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
-  const find = (...names: string[]) => names.map((n) => headers.indexOf(n)).find((i) => i >= 0) ?? -1;
+  const headers = splitCsvLine(lines[0]).map((header) => header.trim().toLowerCase());
+  const find = (...names: string[]) => names.map((name) => headers.indexOf(name)).find((index) => index >= 0) ?? -1;
   const dateIndex = find('date', 'transaction date', 'posted date', 'post date');
   const descriptionIndex = find('description', 'name', 'merchant', 'payee', 'memo');
   const amountIndex = find('amount');
@@ -48,15 +83,16 @@ function parseCsv(text: string): Tx[] {
   const accountIndex = find('account', 'account name');
 
   return lines.slice(1).map((line, index) => {
-    const cells = line.match(/("[^"]*"|[^,]+)/g)?.map((cell) => cell.replace(/^"|"$/g, '').trim()) ?? [];
-    const debit = debitIndex >= 0 ? Number(cells[debitIndex] || 0) : 0;
-    const credit = creditIndex >= 0 ? Number(cells[creditIndex] || 0) : 0;
-    const rawAmount = amountIndex >= 0 ? Number(cells[amountIndex] || 0) : credit - debit;
+    const cells = splitCsvLine(line);
+    const debit = debitIndex >= 0 ? parseAmount(cells[debitIndex]) : 0;
+    const credit = creditIndex >= 0 ? parseAmount(cells[creditIndex]) : 0;
+    const rawAmount = amountIndex >= 0 ? parseAmount(cells[amountIndex]) : credit - debit;
+
     return {
       id: `csv-${index}-${cells[dateIndex] ?? ''}`,
       date: cells[dateIndex] || new Date().toISOString().slice(0, 10),
       description: cells[descriptionIndex] || 'Imported transaction',
-      amount: Number.isFinite(rawAmount) ? rawAmount : 0,
+      amount: rawAmount,
       category: cells[categoryIndex] || categorize(cells[descriptionIndex] || '', rawAmount),
       account: cells[accountIndex] || 'Imported',
     };
