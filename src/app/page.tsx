@@ -122,7 +122,7 @@ function Dashboard() {
   }
 
   function updateDebt(id: string, field: keyof Debt, value: string) {
-    setDebts((current) => current.map((debt) => debt.id === id ? { ...debt, [field]: field === 'name' ? value : Number(value) } : debt));
+    setDebts((current) => current.map((debt) => debt.id === id ? { ...debt, [field]: field === 'name' ? value : (Number.isNaN(Number(value)) ? 0 : Number(value)) } : debt));
   }
 
   return <>
