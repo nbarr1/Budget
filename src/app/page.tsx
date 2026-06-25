@@ -37,7 +37,7 @@ function money(value: number) {
 function parseCsv(text: string): Tx[] {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const headers = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').trim().toLowerCase());
   const find = (...names: string[]) => names.map((n) => headers.indexOf(n)).find((i) => i >= 0) ?? -1;
   const dateIndex = find('date', 'transaction date', 'posted date', 'post date');
   const descriptionIndex = find('description', 'name', 'merchant', 'payee', 'memo');
