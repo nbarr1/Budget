@@ -48,7 +48,7 @@ function parseCsv(text: string): Tx[] {
   const accountIndex = find('account', 'account name');
 
   return lines.slice(1).map((line, index) => {
-    const cells = line.match(/("[^"]*"|[^,]+)/g)?.map((cell) => cell.replace(/^"|"$/g, '').trim()) ?? [];
+    const cells = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map((cell) => cell.replace(/^"|"$/g, '').trim());
     const debit = debitIndex >= 0 ? Number(cells[debitIndex] || 0) : 0;
     const credit = creditIndex >= 0 ? Number(cells[creditIndex] || 0) : 0;
     const rawAmount = amountIndex >= 0 ? Number(cells[amountIndex] || 0) : credit - debit;
