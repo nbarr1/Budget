@@ -79,6 +79,7 @@ function parseCsv(text: string): Tx[] {
   const amountIndex = find('amount');
   const debitIndex = find('debit', 'withdrawal');
   const creditIndex = find('credit', 'deposit');
+  const debitCreditIndex = find('debit/credit', 'debit credit', 'transaction type', 'type');
   const categoryIndex = find('category');
   const accountIndex = find('account', 'account name');
 
@@ -86,7 +87,9 @@ function parseCsv(text: string): Tx[] {
     const cells = splitCsvLine(line);
     const debit = debitIndex >= 0 ? parseAmount(cells[debitIndex]) : 0;
     const credit = creditIndex >= 0 ? parseAmount(cells[creditIndex]) : 0;
-    const rawAmount = amountIndex >= 0 ? parseAmount(cells[amountIndex]) : credit - debit;
+    const amount = amountIndex >= 0 ? parseAmount(cells[amountIndex]) : credit - debit;
+    const debitCreditKind = debitCreditIndex >= 0 ? cells[debitCreditIndex]?.trim().toLowerCase() : '';
+    const rawAmount = debitCreditKind === 'debit' ? -Math.abs(amount) : debitCreditKind === 'credit' ? Math.abs(amount) : amount;
 
     return {
       id: `csv-${index}-${cells[dateIndex] ?? ''}`,
