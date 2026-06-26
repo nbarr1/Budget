@@ -27,7 +27,8 @@ const headerAliases = {
   amount: ['amount', 'transaction amount'],
   debit: ['debit', 'withdrawal', 'withdrawals', 'charge'],
   credit: ['credit', 'deposit', 'deposits'],
-  category: ['category', 'type'],
+  transactionType: ['debit/credit', 'debit credit', 'transaction type', 'type'],
+  category: ['category'],
   account: ['account', 'account name'],
 };
 
@@ -153,6 +154,14 @@ function amountToCents(input: string) {
   return Math.round(amount * 100);
 }
 
+function applyDebitCreditSign(amountCents: number | null, kind: string) {
+  if (amountCents == null) return null;
+  const normalizedKind = kind.trim().toLowerCase();
+  if (/^(debit|withdrawal|charge|expense)$/.test(normalizedKind)) return -Math.abs(amountCents);
+  if (/^(credit|deposit|income)$/.test(normalizedKind)) return Math.abs(amountCents);
+  return amountCents;
+}
+
 function normalizeDate(input: string) {
   const value = input.trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -211,9 +220,10 @@ export class CsvStatementImporter implements StatementImporter {
       const date = value(row, headerAliases.date);
       const name = value(row, headerAliases.name);
       const amount = amountToCents(value(row, headerAliases.amount));
+      const amountKind = value(row, headerAliases.transactionType);
       const debit = amountToCents(value(row, headerAliases.debit));
       const credit = amountToCents(value(row, headerAliases.credit));
-      const amountCents = amount ?? (credit ?? 0) - (debit ?? 0);
+      const amountCents = applyDebitCreditSign(amount, amountKind) ?? (credit ?? 0) - (debit ?? 0);
       if (!date || !name || amountCents === 0) return [];
       return {
         date,
